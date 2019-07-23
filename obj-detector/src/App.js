@@ -1,6 +1,9 @@
 import React, {useRef, useEffect} from 'react';
 import './App.css';
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
+import bread from './sandwich-bread.jpeg';
+
+console.log(bread);
 
 function App() {
   // Loading the model comes with a Promise. Will proceed only when the promise is fulfilled. 
@@ -20,6 +23,7 @@ function App() {
 
   const drawBBox = predictions => {
     const ctx = canvasRef.current.getContext('2d');
+    const image = document.getElementById('top-bread');
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     ctx.strokeStyle = 'red';
@@ -28,11 +32,18 @@ function App() {
     ctx.font = '12px sans-serif';
 
     predictions.forEach(prediction => {
+      const topBread = new Image();
+      topBread.src = bread;
+
       const predText = prediction.class + ' ' + (prediction.score * 100).toFixed(2);
       const textWidth = ctx.measureText(predText).width;
       const textHeight = parseInt(ctx.font, 10);
+      
+      ctx.drawImage(topBread, prediction.bbox[0],prediction.bbox[1], prediction.bbox[2], (topBread.height*prediction.bbox[3])/topBread.width)
+      
       ctx.strokeRect(prediction.bbox[0], prediction.bbox[1], prediction.bbox[2], prediction.bbox[3]);
       ctx.fillStyle = '#F00';
+      
       ctx.fillRect(prediction.bbox[0]-ctx.lineWidth/2, prediction.bbox[1], textWidth + ctx.lineWidth, -textHeight);
       ctx.fillStyle = '#FFF'
       ctx.fillText(predText, prediction.bbox[0], prediction.bbox[1]);
@@ -67,6 +78,7 @@ function App() {
   // Render the app
   return (
     <>
+      <img id="top-bread" src={bread} className="hidden"/>
       <video
         ref={videoRef}
         className='app-position'
@@ -82,6 +94,7 @@ function App() {
         width={winWidth}
         height={winHeight}
       />
+      <img id="bottom-bread" src={bread} className="hidden"/>
     </>
     );
 }
